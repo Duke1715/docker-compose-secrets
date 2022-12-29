@@ -121,7 +121,7 @@ First, download the latest binary from GitHub and make it executable:
 
 ```bash
 sudo mkdir /usr/local/docker-compose-secrets && cd /usr/local/docker-compose-secrets
-sudo wget https://github.com/KNIF/docker-compose-secrets/releases/download/1.0/dcs
+sudo wget https://github.com/KNIF/docker-compose-secrets/releases/download/v1.0/dcs
 sudo chmod +x dcs
 ```
 
