@@ -3,13 +3,14 @@ package services
 import (
 	"docker-compose-secrets/app/client"
 	"docker-compose-secrets/app/environment"
+	"docker-compose-secrets/app/models"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
 )
 
-const GetSecretsDataPath = "v1/secrets/data"
+const getSecretsDataPath = "v1/secret/data"
 
 type SecretService struct {
 	httpClient         *client.HttpClient
@@ -17,13 +18,14 @@ type SecretService struct {
 }
 
 func NewSecretService(
-	httpClient *client.HttpClient, environmentService *environment.Service) *SecretService {
+	httpClient *client.HttpClient, environmentService *environment.Service,
+) *SecretService {
 	return &SecretService{httpClient, environmentService}
 }
 
 func (s *SecretService) GetSecrets() (map[string]string, error) {
 	headers := make(map[string]string)
-	headers["X-Vault-Token"] = s.environmentService.GetVaultToken()
+	headers[client.HeaderVaultTokenName] = s.environmentService.GetVaultToken()
 
 	response, err := s.httpClient.Get(
 		s.buildUrl(),
@@ -33,22 +35,18 @@ func (s *SecretService) GetSecrets() (map[string]string, error) {
 		return nil, err
 	}
 
-	var result map[string]interface{}
+	var result models.GetSecretsResult
 	if err := json.Unmarshal(response, &result); err != nil {
 		return nil, err
 	}
 
-	if result["errors"] != nil {
-		var errorMessages []string
-		for _, e := range result["errors"].([]interface{}) {
-			errorMessages = append(errorMessages, e.(string))
-		}
-		return nil, errors.New(strings.Join(errorMessages, "; "))
+	if len(result.Errors) > 0 {
+		return nil, errors.New(strings.Join(result.Errors, "; "))
 	}
 
 	secrets := make(map[string]string)
-	for secretKey, secretValue := range result {
-		secrets[secretKey] = secretValue.(string)
+	for secretKey, secretValue := range result.Data.Data {
+		secrets[secretKey] = secretValue
 	}
 
 	return secrets, nil
@@ -58,7 +56,7 @@ func (s *SecretService) buildUrl() string {
 	return fmt.Sprintf(
 		"%s/%s/%s",
 		s.environmentService.GetVaultAddr(),
-		GetSecretsDataPath,
+		getSecretsDataPath,
 		s.environmentService.GetVaultPath(),
 	)
 }

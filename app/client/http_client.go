@@ -4,6 +4,8 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+const HeaderVaultTokenName = "X-Vault-Token"
+
 type HttpClient struct {
 	client *resty.Client
 }
