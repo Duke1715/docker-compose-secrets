@@ -1,0 +1,5 @@
+.idea
+
+# compiled app names:
+/docker-compose-secrets
+/dcs
