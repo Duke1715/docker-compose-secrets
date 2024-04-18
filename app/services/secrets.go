@@ -35,13 +35,9 @@ func (s *SecretService) GetSecrets() (map[string]string, error) {
 		return nil, err
 	}
 
-	var result models.GetSecretsResult
-	if err := json.Unmarshal(response, &result); err != nil {
+	result, err := s.parseResponse(response)
+	if err != nil {
 		return nil, err
-	}
-
-	if len(result.Errors) > 0 {
-		return nil, errors.New(strings.Join(result.Errors, "; "))
 	}
 
 	secrets := make(map[string]string)
@@ -59,4 +55,21 @@ func (s *SecretService) buildUrl() string {
 		getSecretsDataPath,
 		s.environmentService.GetVaultPath(),
 	)
+}
+
+func (s *SecretService) parseResponse(response []byte) (*models.GetSecretsResult, error) {
+	var result models.GetSecretsResult
+	if err := json.Unmarshal(response, &result); err != nil {
+		return nil, err
+	}
+
+	if len(result.Errors) > 0 {
+		return nil, errors.New(strings.Join(result.Errors, "; "))
+	}
+
+	if result.Data == nil {
+		return nil, errors.New("secrets not found")
+	}
+
+	return &result, nil
 }
