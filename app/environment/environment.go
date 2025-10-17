@@ -1,7 +1,6 @@
 package environment
 
 import (
-	"errors"
 	"fmt"
 	"os"
 )
@@ -28,11 +27,9 @@ func NewService() *Service {
 func (e *Service) CheckExistSystemEnv() error {
 	for envKey, envVal := range e.systemEnv {
 		if envVal == "" {
-			return errors.New(
-				fmt.Sprintf(
-					"environment variable `%s` is empty",
-					envKey,
-				),
+			return fmt.Errorf(
+				"environment variable `%s` is empty",
+				envKey,
 			)
 		}
 	}

@@ -4,6 +4,7 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
+// gosec:ignore G101 -- this is a public header name constant, not a secret
 const HeaderVaultTokenName = "X-Vault-Token"
 
 type HttpClient struct {
