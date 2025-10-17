@@ -1,36 +1,42 @@
-# .github/workflows/release.yml
-name: Goreleaser
-
-on: push
-
-permissions:
-  contents: write
-  # packages: write
-  # issues: write
-
-jobs:
-  goreleaser:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: stable
-      # More assembly might be required: Docker logins, GPG, etc.
-      # It all depends on your needs.
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v5
-        with:
-          # either 'goreleaser' (default) or 'goreleaser-pro'
-          distribution: goreleaser
-          # 'latest', 'nightly', or a semver
-          version: latest
-          args: release --clean
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Your GoReleaser Pro key, if you are using the 'goreleaser-pro' distribution
-          # GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
+project_name: dcs
+before:
+  hooks:
+    - go mod download
+builds:
+  - id: dcs
+    main: ./
+    binary: dcs
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    flags: ["-trimpath"]
+    ldflags:
+      - -s -w
+archives:
+  - id: archive
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format: tar.gz
+    files:
+      - LICENSE
+      - README.md
+brews:
+  - name: dcs
+    repository:
+      owner: KNIF
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    commit_author:
+      name: goreleaser
+      email: goreleaser@users.noreply.github.com
+    homepage: https://github.com/KNIF/docker-compose-secrets
+    description: Manage Docker Compose secrets from HashiCorp Vault
+checksum:
+  name_template: "checksums.txt"
+changelog:
+  sort: desc
+  use: git
