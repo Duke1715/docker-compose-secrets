@@ -9,6 +9,68 @@ The secrets are stored and managed securely in Vault and are injected into Docke
 
 With this setup, no more secrets can be leaked through insufficiently protected `.env` or `docker-compose.yml` files.
 
+## Usage
+
+### Requirements
+
+- Docker CLI with Compose plugin (`docker compose`)
+- HashiCorp Vault with KV v2 enabled at path `secret`
+
+### Environment variables (required)
+
+- `VAULT_ADDR`: Vault base URL, e.g. `http://127.0.0.1:8200`
+- `VAULT_TOKEN`: Vault token with read access to the secret
+- `VAULT_PATH`: Secret name under the KV v2 engine `secret` (e.g. `logto` if you wrote `secret/logto`)
+
+### Commands
+
+- `start`: runs `docker compose up -d` and injects secrets as environment variables
+- `stop`: runs `docker compose down --remove-orphans`
+- `restart`: runs `docker compose up -d --force-recreate` and injects secrets
+- `update`: runs `docker compose pull`, and then automatically performs `restart`
+
+### CLI syntax
+
+```
+dcs <command>
+
+Commands:
+  start | stop | restart | update
+```
+
+### Examples
+
+Set environment variables once in your shell and run a command:
+
+```bash
+export VAULT_ADDR='http://127.0.0.1:8200'
+export VAULT_TOKEN='s.xxxxxxxx'
+export VAULT_PATH='logto'
+
+dcs start
+```
+
+One-liner without exporting variables globally:
+
+```bash
+VAULT_ADDR='http://127.0.0.1:8200' \
+VAULT_TOKEN='s.xxxxxxxx' \
+VAULT_PATH='logto' \
+dcs restart
+```
+
+Stop and remove orphans:
+
+```bash
+dcs stop
+```
+
+Pull latest images and redeploy:
+
+```bash
+dcs update
+```
+
 ## Demo
 
 In Vault, the secrets (environment variables) of an application (in this case: [Logto](https://logto.io)) are stored in a [KV Secrets Engine - Version 2](https://developer.hashicorp.com/vault/docs/secrets/kv/kv-v2), located at the default "secret" path.
