@@ -24,17 +24,6 @@ archives:
     files:
       - LICENSE
       - README.md
-brews:
-  - name: dcs
-    repository:
-      owner: KNIF
-      name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
-    commit_author:
-      name: goreleaser
-      email: goreleaser@users.noreply.github.com
-    homepage: https://github.com/KNIF/docker-compose-secrets
-    description: Manage Docker Compose secrets from HashiCorp Vault
 checksum:
   name_template: "checksums.txt"
 changelog:
